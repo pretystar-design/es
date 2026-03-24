@@ -1,0 +1,13 @@
+{
+  "nodes": [
+    {
+      "id": "my_instance",
+      "type": "aws_instance",
+      "attributes": {
+        "ami": "ami-12345",
+        "instance_type": "t2.micro"
+      }
+    }
+  ],
+  "edges": []
+}
