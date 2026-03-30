@@ -22,5 +22,26 @@ class TestGenerateHCL(unittest.TestCase):
         )
         self.assertEqual(generate_hcl(proj), expected)
 
+    def test_with_edges(self):
+        proj = {
+            "nodes": [
+                {"id": "a", "type": "aws_instance", "attributes": {"ami": "ami-123"}},
+                {"id": "b", "type": "aws_security_group", "attributes": {"name": "sg"}}
+            ],
+            "edges": [
+                {"source": "a", "target": "b", "type": "dependency"}
+            ]
+        }
+        expected = (
+            'resource "aws_instance" "a" {\n'
+            '  ami = "ami-123"\n'
+            '}\n\n'
+            'resource "aws_security_group" "b" {\n'
+            '  name = "sg"\n'
+            '  depends_on = ["a"]\n'
+            '}\n\n'
+        )
+        self.assertEqual(generate_hcl(proj), expected)
+
 if __name__ == '__main__':
     unittest.main()
