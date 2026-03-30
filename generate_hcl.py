@@ -2,6 +2,14 @@ import json
 import sys
 
 def generate_hcl(project):
+    # Build dependency map: target -> list of sources
+    dep_map = {}
+    for edge in project.get('edges', []):
+        # Treat every edge as a depends_on relationship
+        target = edge.get('target')
+        source = edge.get('source')
+        if target and source:
+            dep_map.setdefault(target, []).append(source)
     lines = []
     for node in project.get('nodes', []):
         res_type = node.get('type')
@@ -9,6 +17,11 @@ def generate_hcl(project):
         lines.append(f'resource "{res_type}" "{res_id}" {{')
         for k, v in node.get('attributes', {}).items():
             lines.append(f'  {k} = "{v}"')
+        # Add depends_on block if there are dependencies for this node
+        if res_id in dep_map:
+            deps = dep_map[res_id]
+            dep_str = ', '.join(f'"{d}"' for d in deps)
+            lines.append(f'  depends_on = [{dep_str}]')
         lines.append('}')
         lines.append('')
     # Ensure the output ends with a newline
